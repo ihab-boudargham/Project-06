@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        body {
+          background-color: #f0f0f0;
+        }
+      
+        .game-container {
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+          padding: 20px;
+          margin: 20px;
+          width: 650px;
+          height: 700px; 
+          margin: auto; 
+        }
+      
+        h1, .game-message {
+          font-family: 'Work Sans', sans-serif; 
+          text-align: center;
+          color: #333; 
+        }
+      
+        h1 {
+          font-size: 2rem;
+          margin-bottom: 20px;
+        }
+      
+        .box {
+          width: 50px;
+          height: 50px;
+          background-color: grey;
+          border: 1px solid rgb(212, 212, 212);
+          border-radius: 5px; 
+          transition: background-color 0.3s ease; 
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); 
+        }
+      
+        .water-box {
+          background-color: #66c2ff; 
+        }
+      
+        .start-box {
+          background-color: #ff4d4d; 
+        }
+      
+        .end-box {
+          background-color: #66ff66;
+        }
+      
+        .hovered-water-box {
+          background-color: #0033cc; 
+          color: #fff; 
+        }
+      /* New styles for the start screen overlay */
+      .start-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black overlay */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999; /* Ensure the start screen is above other elements */
+        color: #fff; /* White text color */
+      }
+
+      .start-button {
+        padding: 10px 20px;
+        font-size: 1.5rem;
+        background-color: #4caf50; /* Green button color */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .start-screen h1 {
+        color: antiquewhite;
+      }
+
+      .try-again-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #e74c3c, #f39c12); /* Gradient background */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        color: #fff;
+      }
+
+      .try-again-screen h1 {
+        font-family: 'Work Sans', sans-serif;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+
+      .try-again-screen p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        max-width: 80%;
+        text-align: center;
+      }
+
+      .try-again-button {
+        padding: 15px 30px;
+        font-size: 1.5rem;
+        background-color: #e67e22; /* Orange button color */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .try-again-button:hover {
+        background-color: #d35400; /* Darker orange on hover */
+      }
+
+      .win-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #2ecc71, #3498db); /* Gradient background */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        color: #fff;
+      }
+
+      .win-screen h1 {
+        font-family: 'Work Sans', sans-serif;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+
+      .win-screen p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        max-width: 80%;
+        text-align: center;
+      }
+
+      .try-again-button, .play-again-button {
+        padding: 15px 30px;
+        font-size: 1.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .try-again-button {
+        background-color: #e74c3c; /* Red button color */
+        color: #fff;
+        margin-right: 10px;
+      }
+
+      .try-again-button:hover {
+        background-color: #c0392b; /* Darker red on hover */
+      }
+
+      .play-again-button {
+        background-color: #3498db; /* Blue button color */
+        color: #fff;
+      }
+
+      .play-again-button:hover {
+        background-color: #2980b9; /* Darker blue on hover */
+      }
+
+    </style>
+  </head>
+  <title>Mine Field!</title>
+  <body>
+    <audio id="waterSound" src="path/to/water-sound.mp3"></audio>
+    <audio id="loseSound" src="path/to/lose-sound.mp3"></audio>
+    <audio id="winSound" src="path/to/win-sound.mp3"></audio>
+
+    <!-- Start screen overlay -->
+    <div class="start-screen">
+      <h1 >Welcome to MineField!</h1>
+      <p>Can you navigate through the minefield and reach the end?</p>
+      <button class="start-button mt-3" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- Game container -->
+    <div class="game-container flex flex-col justify-center items-center">
+        <h1 class="game-message">Message</h1>
+        <div class="boxes-container flex flex-wrap"></div>
+      </div>
+      
+    <!-- Try again screen overlay -->
+    <div class="try-again-screen">
+        <h1>Oops! You Lost!</h1>
+        <p>But don't worry, you can try again!</p>
+        <button class="try-again-button" onclick="tryAgain()">Try Again</button>
+    </div>
+
+    <div class="win-screen">
+        <h1>Congratulations! You Won!</h1>
+        <p>Would you like to try again?</p>
+        <button class="play-again-button" onclick="playAgain()">Play Again</button>
+      </div>
+
+    <script>
+      let N = 12;
+      let startIndex = 13;
+      let endIndex = 96;
+      let waterBoxes = [13, 25, 26, 38, 50, 51, 52, 64 , 76 , 77 , 78, 90 , 91, 92,104,116,128,129,130,131,119,107,95,96];
+      let boxesContainer = document.querySelector('.boxes-container');
+      // 10 x 10
+      // loop to generate 100 boxes
+      generateInActiveGameBoard();
+
+      function generateActiveGameBoard() {
+        boxesContainer.innerHTML = '';
+        for (i = 1; i <= N * N; i++) {
+          // generate a box
+          let boxHTML = generateBoxHTML(i);
+          // append it to boxes container
+          boxesContainer.innerHTML += boxHTML;
+        }
+
+        document.querySelectorAll('.box').forEach(function (boxElement) {
+          boxElement.addEventListener('mouseover', function () {
+            if (!waterBoxes.includes(parseInt(boxElement.dataset.index))) {
+              userLost();
+            } 
+          });
+        });
+
+        document.querySelectorAll('.water-box').forEach(function (waterBoxElement) {
+        waterBoxElement.addEventListener('mouseover', function () {
+            waterBoxElement.classList.add('hovered-water-box');
+            playWaterSound();
+        });
+        waterBoxElement.addEventListener('mouseout', function () {
+            waterBoxElement.classList.remove('hovered-water-box');
+        });
+        })
+
+        document.querySelector('.end-box').addEventListener('mouseover', function () {
+          updateGameMessage('You won!');
+        });
+
+        document.querySelector('.boxes-container').addEventListener('mouseleave', userLost);
+
+        document.querySelector('.end-box').addEventListener('mouseover', function () {
+         userWon();
+        });
+      }
+
+      function userLost() {
+        // show you lose message
+        updateGameMessage('You lost! Try again.');
+        // reset board
+        generateInActiveGameBoard();
+      }
+
+      function generateInActiveGameBoard() {
+        boxesContainer.innerHTML = '';
+        for (i = 1; i <= N * N; i++) {
+          // generate a box
+          let boxHTML = generateInActiveBox(i);
+          // append it to boxes container
+          boxesContainer.innerHTML += boxHTML;
+        }
+        document.querySelector('.start-box').addEventListener('click', startGame);
+      }
+
+      function startGame() {
+        // Remove the start screen
+        document.querySelector('.start-screen').style.display = 'none';
+        
+        // Start the game
+        updateGameMessage('Game started, avoid the gray boxes!');
+        generateActiveGameBoard();
+      }
+
+      function updateGameMessage(message) {
+        document.querySelector('.game-message').innerHTML = message;
+      }
+
+      function generateBoxHTML(i) {
+        let isWater = waterBoxes.includes(i);
+        return `
+        <p data-index=${i} class="box ${i == startIndex ? 'start-box' : ''} ${i == endIndex ? 'end-box' : ''} ${isWater ? 'water-box' : ''}"></p>
+        `;
+      }
+
+      function generateInActiveBox(i) {
+        return `
+        <p class="box ${i == startIndex ? 'start-box' : ''}"></p>
+        `;
+      }
+
+      function userLost() {
+        // show try again screen
+        document.querySelector('.try-again-screen').style.display = 'flex';
+        playLoseSound();
+    }
+
+      function tryAgain() {
+        // hide try again screen
+        document.querySelector('.try-again-screen').style.display = 'none';
+
+        // reset board and start a new game
+        generateInActiveGameBoard();
+      }
+
+      function userWon() {
+        console.log('User won!');
+        document.querySelector('.win-screen').style.display = 'flex';
+        playWinSound();    
+    }
+
+      function tryAgain() {
+        // hide try again screen
+        document.querySelector('.try-again-screen').style.display = 'none';
+
+        // reset board and start a new game
+        generateInActiveGameBoard();
+      }
+
+      function playAgain() {
+        // hide win screen
+        document.querySelector('.win-screen').style.display = 'none';
+
+        // reset board and start a new game
+        generateInActiveGameBoard();
+      }
+    </script>
+  </body>
+</html>
